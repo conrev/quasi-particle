@@ -1,3 +1,3 @@
 # quasi-particle
-A physics based puzzle game implemented using JavaFX and (probably) LWJGL
+A physics based puzzle game implemented using OpenGL (libGDX)
  ( Initial Commit )
