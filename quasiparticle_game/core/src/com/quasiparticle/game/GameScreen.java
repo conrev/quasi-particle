@@ -19,6 +19,7 @@ public class GameScreen implements Screen {
     private TargetParticle tp;
     private int GAME_STATE;
     private ArrayList<Bubble> bub;
+    private ArrayList<Spike> spike;
     private Tramp trmp;
     private Texture background;
     private RopeAnchor ra;
@@ -30,6 +31,7 @@ public class GameScreen implements Screen {
         camera.setToOrtho(false, 1280, 720);
         background=new Texture(Gdx.files.internal("quasi-particle.jpg"));
         bub=new ArrayList<Bubble>();
+        spike = new ArrayList<Spike>();
         createWorld();
 
     }
@@ -39,8 +41,9 @@ public class GameScreen implements Screen {
         mp=new MainParticle(new Vector2(600,600));
         tp=new TargetParticle(new Vector2(600,32));
         trmp=new Tramp(new Vector2(300,100),32,80);
-        bub.add(new Bubble(new Vector2(600,200)));
+        //bub.add(new Bubble(new Vector2(600,200)));
         bub.add(new Bubble(new Vector2(300,500)));
+        spike.add(new Spike(new Vector2(600,200)));
       //  ra=new RopeAnchor(new Vector2(500,600),false);
       //  ra.createConnection(mp);
 
@@ -52,9 +55,17 @@ public class GameScreen implements Screen {
             GAME_STATE = 2;
         }
 
+
         for(int i=0;i<bub.size();i++) {
             bub.get(i).PlayerCollide(mp);
             bub.get(i).step(Gdx.graphics.getDeltaTime());
+        }
+        for(int i=0;i<spike.size();i++)
+        {
+            if(spike.get(i).isCollide((mp)))
+            {
+                GAME_STATE = 0;
+            }
         }
         trmp.PlayerCollision(mp);
         mp.step(Gdx.graphics.getDeltaTime());
@@ -68,7 +79,12 @@ public class GameScreen implements Screen {
             game.batch.begin();
             game.shape.begin(ShapeRenderer.ShapeType.Line);
             game.batch.draw(background,0,0);
-            if(GAME_STATE==1) {
+            if(GAME_STATE==0)
+            {
+                game.font.draw(game.batch,"YOU LOSE! ", 0, 720);
+
+            }
+            else if(GAME_STATE==1) {
                 //game.font.draw(game.batch, "Current Ball Position x= " + mp.getBoundaries().x+" y= "+ mp.getBoundaries().y, 0, 720);
                 game.font.draw(game.batch, "Current Ball Velocity x= " + mp.getVelocity().x+" y= "+ mp.getVelocity().y, 0, 720);
 //                game.font.draw(game.batch, "Temporary Velocity" +ra.rp.tempvelocity+"Length: "+ra.rp.getLength(),0,700);
@@ -80,6 +96,10 @@ public class GameScreen implements Screen {
                 {
                     game.shape.circle(bub.get(i).getBoundaries().x,bub.get(i).getBoundaries().y,bub.get(i).getBoundaries().radius);
                  //   game.font.draw(game.batch,"Current Bubble Position: x= "+bub.get(i).getBoundaries().x+"y= "+bub.get(i).getBoundaries().y,0,690);
+                }
+                for(int i=0;i<spike.size();i++)
+                {
+                    game.batch.draw(spike.get(i).getTex(), spike.get(i).getPosition().x-32, spike.get(i).getPosition().y-32);
                 }
             }
             else if(GAME_STATE==2)
@@ -116,7 +136,7 @@ public class GameScreen implements Screen {
         // begin a new batch and draw the bucket and
         // all drops
         draw();
-        performGameLogic();
+        if(GAME_STATE==1)performGameLogic();
 
 
         if (Gdx.input.isTouched()) {
