@@ -5,4 +5,7 @@ package com.quasiparticle.Math;
  */
 public class Constants {
     public static final float GRAVITY=9.8f;
+    public static final float PPM=50;
+    public static final int NON_OBJECT= 2;
+    public static final int OBJECT=4;
 }

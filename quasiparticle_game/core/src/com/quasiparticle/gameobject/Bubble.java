@@ -1,60 +1,66 @@
 package com.quasiparticle.gameobject;
 
-
-
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
-import com.quasiparticle.Math.Constants;
+import com.badlogic.gdx.physics.box2d.*;
 import com.quasiparticle.Math.Circle;
+import com.quasiparticle.Math.Constants;
+
 /**
- * Created by conrev on 7/12/16.
+ * Created by conrev on 7/19/16.
  */
 public class Bubble extends GameObject {
-    MainParticle mp;
-    Circle bounds;
-    private float tta;
 
-    public Bubble(Vector2 position)
+    Circle boundaries;
+
+    public Bubble(Vector2 position, World world)
     {
-        super(position,true);
-        bounds = new Circle(position,50);
-        tta=22;
-    }
+        BodyDef bdef = new BodyDef();
+        bdef.position.set(position.x/Constants.PPM,position.y/ Constants.PPM);
+        bdef.fixedRotation=true;
+        bdef.type= BodyDef.BodyType.StaticBody;
 
-    public void PlayerCollide(MainParticle mp)
-    {
-        if(bounds.overlaps(mp.getBoundaries()))
-        {
-            this.mp=mp;
+        Body body = world.createBody(bdef);
 
-        }
+        CircleShape shape = new CircleShape();
+        shape.setRadius(30/Constants.PPM);
+        FixtureDef fdef = new FixtureDef();
+        fdef.shape=shape;
+        fdef.density=1;
+        fdef.friction=0;
+        fdef.isSensor=true;
+        fdef.filter.categoryBits= Constants.OBJECT;
+        fdef.filter.maskBits=Constants.OBJECT;
+        body.createFixture(fdef).setUserData("Bubble");
 
+        shape.dispose();
+        setBody(body);
+        //setTexture(new Texture(Gdx.files.internal("")));
+        boundaries=new Circle(position.x,position.y,32);
     }
 
     public Circle getBoundaries()
     {
-        return bounds;
+        return boundaries;
     }
 
-
-    @Override
-    public void step(float dt)
+    public boolean checkPoint(Vector2 point)
     {
-
-        if(mp!=null)
+        if(boundaries.contains(point))
         {
-            bounds.setPosition(mp.getPosition());
-            if(tta!=0) {
-                mp.accelerate(new Vector2(0, 50f));
-                tta-=1;
-            }
-            else
-                mp.accelerate(new Vector2(0, Constants.GRAVITY));
+            return true;
         }
+        return false;
     }
 
 
+    public void draw(ShapeRenderer shape)
+    {
+        shape.begin(ShapeRenderer.ShapeType.Line);
+        shape.circle(boundaries.x,boundaries.y,boundaries.radius);
+        shape.end();
 
-
+    }
 
 
 

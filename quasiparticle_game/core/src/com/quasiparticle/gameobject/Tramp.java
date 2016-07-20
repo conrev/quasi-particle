@@ -1,48 +1,37 @@
 package com.quasiparticle.gameobject;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.*;
 import com.quasiparticle.Math.Constants;
-import com.quasiparticle.Math.Intersector;
-import com.quasiparticle.Math.Rectangle;
 
 /**
- * Created by conrev on 7/13/16.
+ * Created by conrev on 7/20/16.
  */
 public class Tramp extends GameObject {
 
-    Rectangle rect;
+    public Tramp(Vector2 position,World world) {
+        BodyDef bdef = new BodyDef();
+        bdef.position.set(position.x / Constants.PPM, position.y / Constants.PPM);
+        bdef.fixedRotation = true;
+        bdef.type = BodyDef.BodyType.StaticBody;
 
-    public Tramp(Vector2 position,float height,float width)
-    {
-        super(position,false);
-        rect = new Rectangle(getPosition().x-width/2,getPosition().y-height/2,width,height);
-        setTex(new Texture(Gdx.files.internal("tramp.png")));
+        Body body = world.createBody(bdef);
+
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(32 / Constants.PPM, 25 / Constants.PPM);
+
+        FixtureDef fdef = new FixtureDef();
+        fdef.shape = shape;
+        fdef.density = 1;
+        fdef.restitution=2;
+        fdef.friction = 0;
+        fdef.filter.categoryBits = Constants.OBJECT;
+        fdef.filter.maskBits = Constants.OBJECT;
+        body.createFixture(fdef).setUserData("Tramp");
+        body.setTransform(body.getPosition(),(float)Math.PI/4);
+
+        shape.dispose();
+        setBody(body);
     }
-
-    public Rectangle getRect()
-    {
-        return rect;
-    }
-
-    public void PlayerCollision(MainParticle mp)
-    {
-        if(Intersector.overlaps(mp.getBoundaries(),rect)) {
-            if(Math.abs(mp.getVelocity().y)<300) {
-                setVelocity(new Vector2(mp.getVelocity().x,0));
-                accelerate(new Vector2(0, Constants.GRAVITY));
-
-            }
-
-            else
-            mp.setVelocity(new Vector2(mp.getVelocity().x,-mp.getVelocity().y));
-
-        }
-
-    }
-
-
-
 
 }
